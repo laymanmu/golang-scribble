@@ -32,7 +32,7 @@ type (
 	Driver struct {
 		mutex   sync.Mutex
 		mutexes map[string]*sync.Mutex
-		dir     string // the directory where scribble will create the database
+		Dir     string // the directory where scribble will create the database
 		log     Logger // the logger scribble will log to
 	}
 )
@@ -64,7 +64,7 @@ func New(dir string, options *Options) (*Driver, error) {
 
 	//
 	driver := Driver{
-		dir:     dir,
+		Dir:     dir,
 		mutexes: make(map[string]*sync.Mutex),
 		log:     opts.Logger,
 	}
@@ -99,7 +99,8 @@ func (d *Driver) Write(collection, resource string, v interface{}) error {
 	defer mutex.Unlock()
 
 	//
-	dir := filepath.Join(d.dir, collection)
+	dir := filepath.Join(d.Dir, collection)
+	collection = filepath.Base(collection)
 	fnlPath := filepath.Join(dir, resource+".json")
 	tmpPath := fnlPath + ".tmp"
 
@@ -137,7 +138,7 @@ func (d *Driver) Read(collection, resource string, v interface{}) error {
 	}
 
 	//
-	record := filepath.Join(d.dir, collection, resource)
+	record := filepath.Join(d.Dir, collection, resource)
 
 	// check to see if file exists
 	if _, err := stat(record); err != nil {
@@ -164,7 +165,8 @@ func (d *Driver) ReadAll(collection string) ([]string, error) {
 	}
 
 	//
-	dir := filepath.Join(d.dir, collection)
+	dir := filepath.Join(d.Dir, collection)
+	collection = filepath.Base(collection)
 
 	// check to see if collection (directory) exists
 	if _, err := stat(dir); err != nil {
@@ -204,7 +206,7 @@ func (d *Driver) Delete(collection, resource string) error {
 	defer mutex.Unlock()
 
 	//
-	dir := filepath.Join(d.dir, path)
+	dir := filepath.Join(d.Dir, path)
 
 	switch fi, err := stat(dir); {
 
